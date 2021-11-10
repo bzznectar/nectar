@@ -7,10 +7,10 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/mem"
+	"io/ioutil"
 	"nctr/pkg/alog"
 	"nctr/pkg/constant"
 	"nctr/pkg/service"
-	"io/ioutil"
 	"net/http"
 	"runtime"
 	"strings"
@@ -56,22 +56,22 @@ var (
 	beePort    string
 
 	LowHW = deviceHW{
-		LogicCores:    8,
+		LogicCores:    4,
 		TotalMemory:   uint64(4294967296),
-		FreeDisk:      uint64(107374182400),
+		FreeDisk:      uint64(50374182400),
 		DownloadSpeed: float64(50),
 		UploadSpeed:   float64(5),
 	}
 
 	MediumHW = deviceHW{
-		LogicCores:    16,
+		LogicCores:    8,
 		TotalMemory:   uint64(4294967296 * 2),
 		FreeDisk:      uint64(483183820800),
 		DownloadSpeed: float64(50 * 2),
 		UploadSpeed:   float64(5 * 2),
 	}
 	HighHW = deviceHW{
-		LogicCores:    32,
+		LogicCores:    16,
 		TotalMemory:   uint64(4294967296 * 4),
 		FreeDisk:      uint64(1020054732800),
 		DownloadSpeed: float64(50 * 6),
