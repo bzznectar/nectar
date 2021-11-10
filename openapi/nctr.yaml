@@ -1,0 +1,234 @@
+definitions:
+  IndexData:
+    properties:
+      result:
+        example: Welcome to nctr
+        type: string
+    type: object
+  WalletAddressData:
+    properties:
+      address:
+        example: "0x9379e26C8a88BE0dE1EAdE6a08d2D74767984977"
+        type: string
+    type: object
+  WalletBalanceData:
+    properties:
+      eth:
+        example: 252016926407863988
+        type: number
+      nctr:
+        example: 9990000000000000000
+        type: number
+    type: object
+  ExportKeyData:
+    properties:
+      address:
+        example: "0x9379e26C8a88BE0dE1EAdE6a08d2D74767984977"
+        type: string
+      privateKey:
+        example: "c5165bc67d8fd223d0601823f7a42582bcad002aa13b25d985a2ad99efe04273"
+        type: string
+    type: object
+  ChequebookAddressData:
+    properties:
+      chequebook:
+        example: "0x63f8d64dab4834164f0644b2a9f47986cc94a9ba"
+        type: string
+    type: object
+  ChequebookBalanceData:
+    properties:
+      amount:
+        example: 10000000000000000
+        type: number
+    type: object
+  CashoutData:
+    properties:
+      txHash:
+        example: "0xbc8c24b7f1c2e280558c43fcfcc5ebe140619c1ebe70d035aa470b69778ec3c9"
+        type: string
+    type: object
+
+  WithDrawData:
+    properties:
+      txHash:
+        example: "0xbc8c24b7f1c2e280558c43fcfcc5ebe140619c1ebe70d035aa470b69778ec3c9"
+        type: string
+    type: object
+  StatusData:
+    properties:
+      harvest:
+        example: false
+        type: boolean
+      pending:
+        example: 10052820886600478574
+        type: number
+      reward:
+        example: 63180264104231621249
+        type: number
+      pledge:
+        example: 63180264104231621249
+        type: number
+
+  RedemData:
+    properties:
+      txHash:
+        example: "0xbc8c24b7f1c2e280558c43fcfcc5ebe140619c1ebe70d035aa470b69778ec3c9"
+        type: string
+  DepositData:
+    properties:
+      txHash:
+        example: "0xbc8c24b7f1c2e280558c43fcfcc5ebe140619c1ebe70d035aa470b69778ec3c9"
+        type: string
+
+
+    type: object
+
+
+
+info:
+  contact: { }
+  description: nctr debug api
+  title: nctr project
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/IndexData'
+      summary: index
+
+
+  /address:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/WalletAddressData'
+      summary: address
+  /chequebook/address:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/ChequebookAddressData'
+      summary: chequebook address
+  /exportKey:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/ExportKeyData'
+      summary: export privatekey
+  /wallet/balance:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/WalletBalanceData'
+      summary: wallet balance
+  /chequebook/balance:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/ChequebookBalanceData'
+      summary: nctr balance
+  /harvest/cashout:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/CashoutData'
+      summary: cashout
+  /harvest/withdraw:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/WithDrawData'
+      summary: withdraw
+  /harvest/status:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/StatusData'
+      summary: harvest status
+  /harvest/redeem:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/RedemData'
+      summary: harvest redeem
+  /harvest/deposit:
+    get:
+      consumes:
+        - 'Accept: */*'
+      produces:
+        - application/json
+      parameters:
+        - description: deposit amount
+          in: query
+          name: amount
+          type: number
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/DepositData'
+      summary: harvest deposit
+
+swagger: "2.0"
