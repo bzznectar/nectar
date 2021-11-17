@@ -1,6 +1,6 @@
 ## Overview
-Nectar is a Layer 2 solution running on the Swarm Network. The Swarm Network and the DAPP ecosystem form the first layer of its infrastructure,  while the BzzHive token economy is built on top of it.  
-It creates a more elaborate reward system for node operators that works as an addition to Swarm’s native incentives system. To become part of the BzzHive economy you need to download and install the Nectar client. Currently, our client is only available for Linux distributions.  
+Nectar is a Layer 2 solution running on the Swarm Network. The Swarm Network and the DAPP ecosystem form the first layer of its infrastructure,  while the NCTR token economy is built on top of it.  
+It creates a more elaborate reward system for node operators that works as an addition to Swarm’s native incentives system. To become part of the NCTR economy you need to download and install the Nectar client. Currently, our client is only available for Linux distributions.  
 
 It has the following features:  
 ●	Cashout and withdraw rewards to/from local nodes.  
