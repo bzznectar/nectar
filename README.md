@@ -19,7 +19,7 @@ NOTE: You need to have a full Swarm node installed and configured before using N
 How to run bzznectar?
 Download the latest release from https://github.com/bzznectar/nectar/releases.
 
-Or use Docker to run the project https://docs.bzznectar.org/docs/bzznectar/docker-installation.
+Or use Docker to run the project https://docs.bzznectar.org/docs/installation/nectar-using-docker.
 
 Or build the latest version with the instruction https://docs.bzznectar.org/docs//installation/run-nectar-on-linux.
 
