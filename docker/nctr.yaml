@@ -1,0 +1,10 @@
+bee-debug-api: :1635
+config: /root/.nctr.yaml
+data-dir: /root/.nctr
+debug-api-addr: :9000
+help: false
+mainnet: false
+network-id: "10"
+password: ""
+swap-endpoint: ws://localhost:8546
+
