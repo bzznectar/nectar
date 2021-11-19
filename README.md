@@ -21,7 +21,7 @@ Download the latest release from https://github.com/bzznectar/nectar/releases.
 
 Or use Docker to run the project https://docs.bzznectar.org/docs/installation/nectar-using-docker.
 
-Or build the latest version with the instruction https://docs.bzznectar.org/docs//installation/run-nectar-on-linux.
+Or build the latest version with the instruction https://docs.bzznectar.org/docs/installation/run-nectar-on-linux.
 
 
 ## HTTP APIs
