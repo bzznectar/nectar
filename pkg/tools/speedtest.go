@@ -296,7 +296,7 @@ func (s *Servers) TestLatency() (*Server, error) {
 	}
 	s.SortServersByLatency()
 	if SIndex > (len(s.Servers) - 1) {
-		SIndex = len(s.Servers)
+		SIndex = len(s.Servers) - 1
 	}
 	if len(s.Servers) < 1 {
 		return nil, errorf("can't not find server,please check net")
