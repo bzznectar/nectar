@@ -9,11 +9,11 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"nctr/pkg/alog"
 	"nctr/pkg/constant"
 	"nctr/pkg/node"
 	"nctr/pkg/version"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -348,7 +348,7 @@ func (c *command) configureSigner(cmd *cobra.Command, logger logging.Logger) (co
 	publicKey = &swarmPrivateKey.PublicKey
 	// }
 
-	logger.Infof("nctr public key %x", crypto.EncodeSecp256k1PublicKey(publicKey))
+	logger.Infof("nectar public key %x", crypto.EncodeSecp256k1PublicKey(publicKey))
 
 	// libp2pPrivateKey, created, err := keystore.Key("libp2p", password)
 	libp2pPrivateKey, _, err := keystore.Key("libp2p", password)
@@ -398,6 +398,9 @@ func (c *command) configureSigner(cmd *cobra.Command, logger logging.Logger) (co
 	pssPublicKey := crypto.EncodeSecp256k1PublicKey(&pssPrivateKey.PublicKey)
 	factoryAddress := constant.FactoryAddress
 	mainNet := c.config.GetBool(optionNameMainNet)
+	depositGas:=c.config.GetUint64(optionNameSwapInitialDeposit)
+	harvestGas:=c.config.GetUint64(optionNameHarvestGas)
+
 	node := node.Node{}
 	node.InitNode(dataDir, rpcAddress, privateKey, crypto.EncodeSecp256k1PublicKey(publicKey),
 		pssPublicKey,
@@ -406,7 +409,7 @@ func (c *command) configureSigner(cmd *cobra.Command, logger logging.Logger) (co
 		walletAddress,
 		factoryAddress,
 		swarmPort,
-		debugApi, mainNet)
+		debugApi, mainNet,depositGas,harvestGas)
 	return &signerConfig{
 		signer:           signer,
 		publicKey:        publicKey,

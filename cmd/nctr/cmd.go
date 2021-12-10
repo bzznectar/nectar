@@ -32,6 +32,8 @@ const (
 	optionNameVerbosity = "verbosity"
 
 	optionNameSwapEndpoint = "swap-endpoint"
+	optionNameSwapInitialDeposit="swap-initial-deposit"
+	optionNameHarvestGas="harvest-gas"
 )
 
 func init() {
@@ -110,7 +112,7 @@ func Execute() (err error) {
 
 func (c *command) initGlobalFlags() {
 	globalFlags := c.root.PersistentFlags()
-	globalFlags.StringVar(&c.cfgFile, "config", "", "config file")
+	globalFlags.StringVar(&c.cfgFile, "config", "", "config file (default is $HOME/.nctr.yaml)")
 }
 
 func (c *command) initConfig() (err error) {
@@ -168,6 +170,8 @@ func (c *command) setAllFlags(cmd *cobra.Command) {
 	cmd.Flags().Uint64(optionNameNetworkID, 10, "ID of the nctr network")
 	// cmd.Flags().String(optionNameVerbosity, "info", "log verbosity level 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=trace")
 	cmd.Flags().String(optionNameSwapEndpoint, "ws://localhost:8546", "swap ethereum blockchain endpoint")
+	cmd.Flags().Uint64(optionNameSwapInitialDeposit,7000000,"swap-initial-deposit")
+	cmd.Flags().Uint64(optionNameHarvestGas,7000000,"harvest gas")
 	cmd.Flags().Bool(optionNameMainNet, false, "Is it the MainNet")
 	//cmd.Flags().String(optionNameBootnodes,"","initial nodes to connect to")
 }
