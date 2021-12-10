@@ -41,6 +41,10 @@ func Get(key string) string {
 	return result
 }
 
+func Remove(key string) {
+	levelDB.Delete([]byte(key), nil)
+}
+
 func FindAll() map[string]string {
 	iter := levelDB.NewIterator(nil, nil)
 	var dict map[string]string = make(map[string]string)

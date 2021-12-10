@@ -7,4 +7,6 @@ mainnet: false
 network-id: "10"
 password: ""
 swap-endpoint: ws://localhost:8546
+harvest-gas: "7000000"
+swap-initial-deposit: "7000000"
 

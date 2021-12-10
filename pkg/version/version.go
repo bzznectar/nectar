@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	version    = "0.5.0" // manually set semantic version number
+	version    = "0.5.5" // manually set semantic version number
 	commitHash string    // automatically set git commit hash
 	commitTime string    // automatically set git commit time
 

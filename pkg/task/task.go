@@ -8,7 +8,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -22,7 +22,6 @@ import (
 	"nctr/pkg/store/localstore"
 	"nctr/pkg/tools"
 	"os"
-	"runtime"
 	"strconv"
 	"time"
 )
@@ -42,11 +41,74 @@ type HeartData struct {
 }
 
 func InitTask() {
+	levelValue := localstore.Get(constant.WriteLevelKey)
+	if levelValue == "" {
+		var level string
+		hw := tools.DeviceInfo.HW
+		if hw == 2||hw==3 {
+			fmt.Println("Which hardware options for harvest:")
+			switch hw {
+
+			case 2:
+				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+				fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
+
+				break
+
+			case 3:
+				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+				fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
+				fmt.Println("3. CPU(16core) RAM(16G) Storage(950G)")
+
+				break
+
+			case 1:
+			default:
+				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+				break
+
+			}
+
+			fmt.Scan(&level)
+		}else {
+			level="1"
+		}
+
+
+		if level == "1" || level == "2" || level == "3" {
+			localstore.Put(constant.WriteLevelKey, level)
+			levelValue = level
+		} else {
+			fmt.Println("input error")
+			os.Exit(0)
+		}
+
+	}
+	switch levelValue {
+	case "1":
+
+		service.Node.TotalDiskFree = tools.LowHW.FreeDisk
+		service.Node.CpuCore = tools.LowHW.LogicCores
+		service.Node.Hw = 1
+		break
+	case "2":
+
+		service.Node.TotalDiskFree = tools.MediumHW.FreeDisk
+		service.Node.CpuCore = tools.MediumHW.LogicCores
+		service.Node.Hw = 2
+		break
+	case "3":
+
+		service.Node.TotalDiskFree = tools.HighHW.FreeDisk
+		service.Node.CpuCore = tools.HighHW.LogicCores
+		service.Node.Hw = 3
+		break
+
+	}
 
 	client = rpcService.ConnectRPC()
 	c := cron.New(cron.WithSeconds())
 	c.AddFunc("0 */5 * * * ?", heart)
-	//c.AddFunc("*/5 * * * * ?", heart)
 	go checkBlock()
 	go createFileJob()
 	go c.Start()
@@ -74,37 +136,53 @@ func checkBlock() {
 		v := tools.GetRandomInt(5, 10)
 		time.Sleep(time.Duration(v) * time.Second)
 
-
+		//	path := filepath.Join(service.Node.DataDir, "filestore")
+		//	name := strconv.Itoa(tools.GetRandomIntValue(int(num)))
+		//
+		//	temp := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
+		//	if !service.Node.MinerStatus && tools.DirSize(path) > 0 && tools.DirSize(path) >= uint64(temp) {
+		//		service.Node.MinerStatus = true
+		//		alog.Info("Start harvesting ...")
+		//	} else {
+		//		go func() {
+		//			for i := 0; i < constant.WriteDiskProcess; i++ {
+		//				go tools.CreateRandomFile(path, 3*1024*1024, 4*1024*1024, name+".ldb")
+		//
+		//			}
+		//
+		//		}()
+		//	}
+		//
 	}
 
 }
 func createFileJob() {
-	size := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
-	MaxId = int(size / (1024 * 1024 * 4))
-	_id := 1
-	id := filestore.Get(IdKey)
 
-	if id != "" {
-		_id, _ = strconv.Atoi(id)
-		_id += 1
+	for {
+		size := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
+		MaxId = int(size / (1024 * 1024 * 4))
+		_id := 1
+		id := filestore.Get(IdKey)
 
-	}
-	if _id < MaxId {
-		cpuNUm:=runtime.NumCPU()*constant.WriteDiskProcess
-		for i := 0; i < cpuNUm; i++ {
-			_id = _id + 1
-			go createFiles(_id)
+		if id != "" {
+			_id, _ = strconv.Atoi(id)
+			_id += 1
 
 		}
-	} else {
-		service.Node.MinerStatus = true
-	}
+		if _id < MaxId {
+			cpuNUm := service.Node.CpuCore
+			for i := 0; i < cpuNUm; i++ {
+				_id = _id + 1
+				go createFiles(_id)
 
-	time.Sleep(time.Duration(1) * time.Second)
-	if _id < MaxId {
-		go createFileJob()
-	} else {
-		service.Node.MinerStatus = true
+			}
+		} else {
+			service.Node.MinerStatus = true
+			break
+		}
+
+		time.Sleep(time.Duration(2) * time.Second)
+
 	}
 
 }
@@ -188,13 +266,14 @@ func heart() {
 			alog.Error(err.Error())
 			return
 		}
-		msg := ethereum.CallMsg{From: common.HexToAddress(service.Node.WalletAddress), GasPrice: price}
-		limit, err := client.EstimateGas(context.Background(), msg)
-		if err != nil {
-			alog.Error(err.Error())
-			return
-		}
-		opts.GasLimit = limit * 100
+		//msg := ethereum.CallMsg{From: common.HexToAddress(service.Node.WalletAddress), GasPrice: price}
+		//limit, err := client.EstimateGas(context.Background(), msg)
+		//if err != nil {
+		//	alog.Error(err.Error())
+		//	return
+		//}
+		opts.GasPrice = price
+		opts.GasLimit = service.Node.HarvestGas
 
 		r, err := json.Marshal(heartData)
 		if err != nil {
@@ -204,7 +283,7 @@ func heart() {
 		result := tools.PswEncrypt(string(r))
 		sign := getSign(timestamp)
 
-		t, err := token.UploadInfo(opts, big.NewInt(timestamp), strconv.FormatInt(timestamp, 10), sign, result, big.NewInt(int64(DeviceInfo.HW)))
+		t, err := token.UploadInfo(opts, big.NewInt(timestamp), strconv.FormatInt(timestamp, 10), sign, result, big.NewInt(int64(service.Node.Hw)))
 		if err != nil {
 			alog.Error(err.Error())
 			return

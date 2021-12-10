@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/robfig/cron/v3"
+	"math/big"
 	"nctr/pkg/abi"
 	"nctr/pkg/alog"
 	"nctr/pkg/bee"
@@ -18,8 +19,6 @@ import (
 	"nctr/pkg/store/localstore"
 	"nctr/pkg/task"
 	"nctr/pkg/tools"
-
-	"math/big"
 	"os"
 )
 
@@ -40,7 +39,7 @@ func (node *Node) InitNode(DataDir string, RpcAddress string, PrivateKey *ecdsa.
 	WalletAddress string,
 	FactoryAddress string,
 	SwarmPort string,
-	DebugApi string, MainNet bool) {
+	DebugApi string, MainNet bool, depositGas uint64, harvestGas uint64) {
 	service.Node.DataDir = DataDir
 	service.Node.RpcAddress = RpcAddress
 	service.Node.PrivateKey = PrivateKey
@@ -53,6 +52,8 @@ func (node *Node) InitNode(DataDir string, RpcAddress string, PrivateKey *ecdsa.
 	service.Node.SwarmPort = SwarmPort
 	service.Node.DebugApi = DebugApi
 	service.Node.MainNet = MainNet
+	service.Node.DepositGas = depositGas
+	service.Node.HarvestGas = harvestGas
 	localstore.InitDb(DataDir)
 	filestore.InitDb(DataDir)
 	node.CheckNode()
@@ -135,13 +136,23 @@ func (node *Node) Deploy() {
 		alog.Error(err.Error())
 		os.Exit(0)
 	}
-	opts, err := bind.NewKeyedTransactorWithChainID(service.Node.PrivateKey, chainId)
+
+	price, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
 		alog.Error(err.Error())
 		os.Exit(0)
 	}
-	alog.Info(service.Node.WalletAddress)
-	alog.Info(contract)
+
+	opts, err := bind.NewKeyedTransactorWithChainID(service.Node.PrivateKey, chainId)
+
+	opts.GasLimit = service.Node.DepositGas
+	opts.GasPrice = price
+	if err != nil {
+		alog.Error(err.Error())
+		os.Exit(0)
+	}
+	alog.Info("bee wallet :" + service.Node.WalletAddress)
+	alog.Info("bee wallet chequebook " + contract)
 	t, err := token.DeployMiner(opts, common.HexToAddress(service.Node.WalletAddress), common.HexToAddress(contract))
 	if err != nil {
 		alog.Error(err.Error())
@@ -176,7 +187,15 @@ func (node *Node) checkBlockStatus() {
 	address := ""
 	for _, log := range logs {
 		if txHash == log.TxHash.String() {
+
 			addr := common.Bytes2Hex(log.Data)
+			if addr == "" {
+
+				localstore.Remove(constant.ContractAddressKey)
+				alog.Info("Transaction failed")
+				os.Exit(0)
+				return
+			}
 			addr = "0x" + string(addr[len(addr)-40:])
 
 			localstore.Put(constant.ContractAddressKey, addr)

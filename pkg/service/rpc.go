@@ -38,6 +38,10 @@ type NodeData struct {
 	MainNet        bool
 	MinerStatus    bool
 	TotalDiskFree  uint64
+	CpuCore        int
+	DepositGas     uint64
+	HarvestGas     uint64
+	Hw             int
 }
 
 var (
@@ -285,8 +289,9 @@ func (service *RpcService) SwarmContractBindStatus(swarmContract string) bool {
 		return true
 
 	}
-	alog.Info("addr: " + addr.String())
+
 	if addr.String() == "0x0000000000000000000000000000000000000000" {
+		alog.Info("Swarm bee node not yet bound with nectar")
 		return false
 	}
 	return true

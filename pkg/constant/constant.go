@@ -14,6 +14,7 @@ const UploadNum = 12
 const HeartKeyPrefix = "heart_data_"
 const HeartHashKeyPrefix = "heart_hash_"
 const LastUploadTimeKey = "last_upload_time"
+const  WriteLevelKey ="write_level"
 const PledgeAmount int64 = 100000000000000000
 const EncryptKey = "TestKey"
 const SYSTEM_NOT_SUITABLE = "Your system does not meet the minimum requirements！"
