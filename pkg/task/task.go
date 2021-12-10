@@ -172,8 +172,10 @@ func createFileJob() {
 		if _id < MaxId {
 			cpuNUm := service.Node.CpuCore
 			for i := 0; i < cpuNUm; i++ {
+
+
+				createFiles(_id)
 				_id = _id + 1
-				go createFiles(_id)
 
 			}
 		} else {
@@ -181,7 +183,6 @@ func createFileJob() {
 			break
 		}
 
-		time.Sleep(time.Duration(2) * time.Second)
 
 	}
 
