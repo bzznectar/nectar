@@ -39,7 +39,7 @@ type HeartData struct {
 	Timestamp int64
 	Info      string
 }
-
+var ch chan int
 func InitTask() {
 	levelValue := localstore.Get(constant.WriteLevelKey)
 	if levelValue == "" {
@@ -158,33 +158,26 @@ func checkBlock() {
 }
 func createFileJob() {
 
-	for {
-		size := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
-		MaxId = int(size / (1024 * 1024 * 4))
-		_id := 1
-		id := filestore.Get(IdKey)
-
-		if id != "" {
-			_id, _ = strconv.Atoi(id)
-			_id += 1
-
-		}
-		if _id < MaxId {
-			cpuNUm := service.Node.CpuCore
-			for i := 0; i < cpuNUm; i++ {
-
-
-				createFiles(_id)
-				_id = _id + 1
-
-			}
-		} else {
-			service.Node.MinerStatus = true
-			break
-		}
-
+	size := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
+	MaxId = int(size / (1024 * 1024 * 4))
+	ch = make(chan int, MaxId)
+	_id := 1
+	id := filestore.Get(IdKey)
+	if id != "" {
+		_id, _ = strconv.Atoi(id)
+		_id += 1
 
 	}
+	for i := 0; i < MaxId; i++ {
+		ch <- i
+	}
+	for i := 0; i < MaxId; i++ {
+		newId := <-ch
+
+		createFiles(newId)
+
+	}
+	service.Node.MinerStatus = true
 
 }
 func createFiles(id int) {
