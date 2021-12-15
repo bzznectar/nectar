@@ -1,7 +1,3 @@
-// Copyright 2020 The Swarm Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package task
 
 import (
@@ -9,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -39,76 +36,71 @@ type HeartData struct {
 	Timestamp int64
 	Info      string
 }
-var ch chan int
+
 func InitTask() {
 	levelValue := localstore.Get(constant.WriteLevelKey)
-	if levelValue == "" {
-		var level string
+	if levelValue == "" && tools.DeviceInfo.HW > 1 {
+
 		hw := tools.DeviceInfo.HW
-		if hw == 2||hw==3 {
-			fmt.Println("Which hardware options for harvest:")
-			switch hw {
+		fmt.Println("Which hardware options for harvest:")
+		switch hw {
 
-			case 2:
-				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
-				fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
+		case 2:
+			fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+			fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
+			service.Node.TotalDiskFree = tools.MediumHW.FreeDisk
+			service.Node.Hw = 3
+			break
 
-				break
+		case 3:
+			fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+			fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
+			fmt.Println("3. CPU(16core) RAM(16G) Storage(950G)")
+			service.Node.TotalDiskFree = tools.HighHW.FreeDisk
+			service.Node.Hw = 2
+			break
 
-			case 3:
-				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
-				fmt.Println("2. CPU(8core) RAM(8G) Storage(450G)")
-				fmt.Println("3. CPU(16core) RAM(16G) Storage(950G)")
+		case 1:
+		default:
+			fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
+			service.Node.TotalDiskFree = tools.LowHW.FreeDisk
+			service.Node.Hw = 1
+			break
 
-				break
-
-			case 1:
-			default:
-				fmt.Println("1. CPU(4core) RAM(4G) Storage(50G)")
-				break
-
-			}
-
-			fmt.Scan(&level)
-		}else {
-			level="1"
 		}
+		var level string
+		fmt.Scan(&level)
+		localstore.Put(constant.WriteLevelKey, level)
+	} else {
+		switch levelValue {
+		case "1":
+
+			service.Node.TotalDiskFree = tools.LowHW.FreeDisk
+			service.Node.Hw = 1
+			break
+		case "2":
+
+			service.Node.TotalDiskFree = tools.MediumHW.FreeDisk
+			service.Node.Hw = 2
+			break
+		case "3":
+
+			service.Node.TotalDiskFree = tools.HighHW.FreeDisk
+			service.Node.Hw = 3
+			break
+		default:
+			service.Node.TotalDiskFree=tools.LowHW.FreeDisk
+			service.Node.Hw = 1
 
 
-		if level == "1" || level == "2" || level == "3" {
-			localstore.Put(constant.WriteLevelKey, level)
-			levelValue = level
-		} else {
-			fmt.Println("input error")
-			os.Exit(0)
 		}
-
-	}
-	switch levelValue {
-	case "1":
-
-		service.Node.TotalDiskFree = tools.LowHW.FreeDisk
-		service.Node.CpuCore = tools.LowHW.LogicCores
-		service.Node.Hw = 1
-		break
-	case "2":
-
-		service.Node.TotalDiskFree = tools.MediumHW.FreeDisk
-		service.Node.CpuCore = tools.MediumHW.LogicCores
-		service.Node.Hw = 2
-		break
-	case "3":
-
-		service.Node.TotalDiskFree = tools.HighHW.FreeDisk
-		service.Node.CpuCore = tools.HighHW.LogicCores
-		service.Node.Hw = 3
-		break
 
 	}
 
 	client = rpcService.ConnectRPC()
 	c := cron.New(cron.WithSeconds())
 	c.AddFunc("0 */5 * * * ?", heart)
+	//c.AddFunc("*/5 * * * * ?", heart)
 	go checkBlock()
 	go createFileJob()
 	go c.Start()
@@ -136,31 +128,14 @@ func checkBlock() {
 		v := tools.GetRandomInt(5, 10)
 		time.Sleep(time.Duration(v) * time.Second)
 
-		//	path := filepath.Join(service.Node.DataDir, "filestore")
-		//	name := strconv.Itoa(tools.GetRandomIntValue(int(num)))
-		//
-		//	temp := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
-		//	if !service.Node.MinerStatus && tools.DirSize(path) > 0 && tools.DirSize(path) >= uint64(temp) {
-		//		service.Node.MinerStatus = true
-		//		alog.Info("Start harvesting ...")
-		//	} else {
-		//		go func() {
-		//			for i := 0; i < constant.WriteDiskProcess; i++ {
-		//				go tools.CreateRandomFile(path, 3*1024*1024, 4*1024*1024, name+".ldb")
-		//
-		//			}
-		//
-		//		}()
-		//	}
-		//
 	}
 
 }
 func createFileJob() {
-
 	size := float64(service.Node.TotalDiskFree) * constant.WriteDiskCoefficient
+
 	MaxId = int(size / (1024 * 1024 * 4))
-	ch = make(chan int, MaxId)
+
 	_id := 1
 	id := filestore.Get(IdKey)
 	if id != "" {
@@ -168,15 +143,10 @@ func createFileJob() {
 		_id += 1
 
 	}
-	for i := 0; i < MaxId; i++ {
-		ch <- i
+	for i := _id; i < MaxId; i++ {
+		createFiles(i)
 	}
-	for i := 0; i < MaxId; i++ {
-		newId := <-ch
 
-		createFiles(newId)
-
-	}
 	service.Node.MinerStatus = true
 
 }
@@ -260,14 +230,13 @@ func heart() {
 			alog.Error(err.Error())
 			return
 		}
-		//msg := ethereum.CallMsg{From: common.HexToAddress(service.Node.WalletAddress), GasPrice: price}
-		//limit, err := client.EstimateGas(context.Background(), msg)
-		//if err != nil {
-		//	alog.Error(err.Error())
-		//	return
-		//}
-		opts.GasPrice = price
-		opts.GasLimit = service.Node.HarvestGas
+		msg := ethereum.CallMsg{From: common.HexToAddress(service.Node.WalletAddress), GasPrice: price}
+		limit, err := client.EstimateGas(context.Background(), msg)
+		if err != nil {
+			alog.Error(err.Error())
+			return
+		}
+		opts.GasLimit = limit * 100
 
 		r, err := json.Marshal(heartData)
 		if err != nil {

@@ -20,6 +20,7 @@ import (
 	"nctr/pkg/task"
 	"nctr/pkg/tools"
 	"os"
+	"strings"
 )
 
 var (
@@ -86,7 +87,11 @@ func (node *Node) Deploy() {
 	contractAddress := localstore.Get(constant.ContractAddressKey)
 	contractHash := localstore.Get(constant.ContractHashKey)
 	b := bee.Bee{}
-	wallet, contract := b.GetBeeNodeInfo("http://localhost" + service.Node.SwarmPort)
+	if strings.HasPrefix(service.Node.SwarmPort,":"){
+		service.Node.SwarmPort="localhost"+service.Node.SwarmPort
+	}
+
+	wallet, contract := b.GetBeeNodeInfo("http://"+service.Node.SwarmPort)
 	if wallet == "" || contract == "" {
 		os.Exit(0)
 	}
