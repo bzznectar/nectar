@@ -54,7 +54,7 @@ services:
       - "${P2P_ADDR:-1634}${BEE_P2P_ADDR:-:1634}"
       - "${DEBUG_API_ADDR:-1635}${BEE_DEBUG_API_ADDR:-:1635}"
     volumes:
-      - /home/bee-docker-data:/home/bee/.bee
+      - /home/bee-data:/home/bee/.bee
     command: start
 
   nectar:
@@ -64,7 +64,7 @@ services:
       - '9000:9000'
     environment:
       - NCTR_DEBUG_API_ADDR=:9000
-      - NCTR_BEE_DEBUG_API=:1635
+      - NCTR_BEE_DEBUG_API=172.17.0.1:1635
       - NCTR_DATA_DIR=/root/.nectar
       - NCTR_MAINNET=false
       - NCTR_NETWORK_ID=10

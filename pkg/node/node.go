@@ -50,11 +50,17 @@ func (node *Node) InitNode(DataDir string, RpcAddress string, PrivateKey *ecdsa.
 	service.Node.NetWorkId = NetWorkId
 	service.Node.WalletAddress = WalletAddress
 	service.Node.FactoryAddress = FactoryAddress
-	service.Node.SwarmPort = SwarmPort
+	service.Node.SwarmAddr = SwarmPort
 	service.Node.DebugApi = DebugApi
 	service.Node.MainNet = MainNet
 	service.Node.DepositGas = depositGas
 	service.Node.HarvestGas = harvestGas
+
+	if strings.HasPrefix(service.Node.SwarmAddr, ":") {
+		service.Node.SwarmAddr = "localhost" + service.Node.SwarmAddr
+	}
+	service.Node.SwarmAddr=strings.TrimSpace(service.Node.SwarmAddr)
+	service.Node.SwarmAddr = "http://" + service.Node.SwarmAddr
 	localstore.InitDb(DataDir)
 	filestore.InitDb(DataDir)
 	node.CheckNode()
@@ -87,11 +93,11 @@ func (node *Node) Deploy() {
 	contractAddress := localstore.Get(constant.ContractAddressKey)
 	contractHash := localstore.Get(constant.ContractHashKey)
 	b := bee.Bee{}
-	if strings.HasPrefix(service.Node.SwarmPort,":"){
-		service.Node.SwarmPort="localhost"+service.Node.SwarmPort
+	if strings.HasPrefix(service.Node.SwarmAddr, ":") {
+		service.Node.SwarmAddr = "localhost" + service.Node.SwarmAddr
 	}
 
-	wallet, contract := b.GetBeeNodeInfo("http://"+service.Node.SwarmPort)
+	wallet, contract := b.GetBeeNodeInfo("http://" + service.Node.SwarmAddr)
 	if wallet == "" || contract == "" {
 		os.Exit(0)
 	}

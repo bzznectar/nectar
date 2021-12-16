@@ -93,7 +93,7 @@ func DealWithErr(err error) {
 //simple check bee node
 func checkBeen() bool {
 
-	resp, err := http.Get("http://localhost" + service.Node.SwarmPort + "/addresses")
+	resp, err := http.Get( service.Node.SwarmAddr + "/addresses")
 	if err == nil {
 		b, err2 := ioutil.ReadAll(resp.Body)
 		if err2 == nil && strings.Contains(string(b), "ethereum") {
@@ -246,12 +246,13 @@ func suitLevel(cpu int, memory uint64, disk uint64, downloadSpeed float64, uploa
 	return cpu >= hw.LogicCores && memory >= hw.TotalMemory && (disk+DirSize(service.Node.DataDir)) >= hw.FreeDisk && downloadSpeed >= hw.DownloadSpeed && uploadSpeed >= hw.UploadSpeed
 }
 func GetHwDiskFree(hw int) uint64 {
-	if hw == 1 {
-		return LowHW.FreeDisk
-	} else if hw == 2 {
+	if hw == 2 {
 		return MediumHW.FreeDisk
-	} else {
+	} else if hw == 3 {
 		return HighHW.FreeDisk
+	} else {
+		return LowHW.FreeDisk
 	}
 
 }
+

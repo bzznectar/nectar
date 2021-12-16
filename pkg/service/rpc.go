@@ -33,7 +33,7 @@ type NodeData struct {
 	NetWorkId      int
 	WalletAddress  string
 	FactoryAddress string
-	SwarmPort      string
+	SwarmAddr      string
 	DebugApi       string
 	MainNet        bool
 	MinerStatus    bool

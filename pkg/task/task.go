@@ -160,7 +160,7 @@ func createFiles(id int) {
 
 func heart() {
 
-	tools.SetBeePort(service.Node.SwarmPort)
+	tools.SetBeePort(service.Node.SwarmAddr)
 
 	DeviceInfo := tools.GetHardwareData()
 	service.Node.TotalDiskFree = tools.GetHwDiskFree(DeviceInfo.HW)
@@ -263,3 +263,4 @@ func heart() {
 func getSign(timestamp int64) [32]byte {
 	return sha256.Sum256([]byte(constant.EncryptKey + strconv.FormatInt(timestamp, 10)))
 }
+
