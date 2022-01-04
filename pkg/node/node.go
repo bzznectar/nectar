@@ -93,11 +93,8 @@ func (node *Node) Deploy() {
 	contractAddress := localstore.Get(constant.ContractAddressKey)
 	contractHash := localstore.Get(constant.ContractHashKey)
 	b := bee.Bee{}
-	if strings.HasPrefix(service.Node.SwarmAddr, ":") {
-		service.Node.SwarmAddr = "localhost" + service.Node.SwarmAddr
-	}
-
-	wallet, contract := b.GetBeeNodeInfo("http://" + service.Node.SwarmAddr)
+	reqUrl := service.Node.SwarmAddr
+	wallet, contract := b.GetBeeNodeInfo(reqUrl)
 	if wallet == "" || contract == "" {
 		os.Exit(0)
 	}
